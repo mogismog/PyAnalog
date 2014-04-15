@@ -2,7 +2,9 @@
 
 import numpy as np
 from ..utils import find_nearest_idx
-
+import warnings
+from fortran_routines import rank_analog,mae_analog,rmse_analog,corr_analog
+from fortran_routines import rank_analog_pt,mae_analog_pt,rmse_analog_pt,corr_analog_pt
 
 class Analog(object):
     """Various methods to produce deterministic/probabilistic forecasts via analogs."""
@@ -18,13 +20,10 @@ class Analog(object):
         train : NumPy array
             Either a 3-d (time,lat,lon) or 4-d (n_vars,time,lat,lon) numpy array of "past"/training data.
         """
-
-
         # --- Set up the class attributes
         self.forecast = forecast
         self.train = train
 
-        return self
 
     def analog_params(self, window=3, comp_method=['Rank'], weights=[]):
         """
@@ -55,9 +54,20 @@ class Analog(object):
         else:
             self.n_vars = 1
 
+        # --- Now, to make sure the method(2) selected is available, and if it is then add
+        available_methods = ['rank','rmse','mae','corr']
+        self.comp_method = []
+        for mthd in comp_method:
+            if any(mthd.lower() in avail for avail in available_methods):
+                self.comp_method.append(mthd.lower())
+            else:
+                warnings.warn('Method {} not an option! Reverting to rank method'.format(mthd.lower()))
+                self.comp_method.append('rank')
+
+
+
         # --- Everything cool? Ok, let's do this.
         self.window = window
-        self.comp_method = comp_method
         self.weights = weights
 
         return self
