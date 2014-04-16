@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from pyanalog.utils import find_nearest_idx
+from .utils import find_nearest_idx
 
 
 class Analog(object):
