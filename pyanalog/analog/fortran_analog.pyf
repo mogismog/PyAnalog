@@ -1,0 +1,133 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module fortran_analog ! in 
+    interface  ! in :fortran_analog
+        subroutine rank_analog(trainfield,fcstfield,trainnum,inum,jnum,startlat,endlat,startlon,endlon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: startlat
+            integer intent(in) :: endlat
+            integer intent(in) :: startlon
+            integer intent(in) :: endlon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum,inum,jnum),intent(out),depend(trainnum,inum,jnum) :: outranks
+        end subroutine rank_analog
+        subroutine rmse_analog(trainfield,fcstfield,trainnum,inum,jnum,startlat,endlat,startlon,endlon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: startlat
+            integer intent(in) :: endlat
+            integer intent(in) :: startlon
+            integer intent(in) :: endlon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum,inum,jnum),intent(out),depend(trainnum,inum,jnum) :: outranks
+        end subroutine rmse_analog
+        subroutine mae_analog(trainfield,fcstfield,trainnum,inum,jnum,startlat,endlat,startlon,endlon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: startlat
+            integer intent(in) :: endlat
+            integer intent(in) :: startlon
+            integer intent(in) :: endlon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum,inum,jnum),intent(out),depend(trainnum,inum,jnum) :: outranks
+        end subroutine mae_analog
+        subroutine corr_analog(trainfield,fcstfield,trainnum,inum,jnum,startlat,endlat,startlon,endlon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: startlat
+            integer intent(in) :: endlat
+            integer intent(in) :: startlon
+            integer intent(in) :: endlon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum,inum,jnum),intent(out),depend(trainnum,inum,jnum) :: outranks
+        end subroutine corr_analog
+        subroutine rank_analog_point(trainfield,fcstfield,trainnum,inum,jnum,closelat,closelon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: closelat
+            integer intent(in) :: closelon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum),intent(out),depend(trainnum) :: outranks
+        end subroutine rank_analog_point
+        subroutine rmse_analog_point(trainfield,fcstfield,trainnum,inum,jnum,closelat,closelon,alllats,alllons,window,outranks) ! in :fortran_analog:fortran_routines.f90
+            real dimension(trainnum,inum,jnum),intent(in),depend(trainnum,inum,jnum) :: trainfield
+            real dimension(inum,jnum),intent(in),depend(inum,jnum) :: fcstfield
+            integer intent(in) :: trainnum
+            integer intent(in) :: inum
+            integer intent(in) :: jnum
+            integer intent(in) :: closelat
+            integer intent(in) :: closelon
+            real dimension(inum),intent(in),depend(inum) :: alllats
+            real dimension(jnum),intent(in),depend(jnum) :: alllons
+            integer intent(in) :: window
+            real dimension(trainnum),intent(out),depend(trainnum) :: outranks
+        end subroutine rmse_analog_point
+        subroutine real_rank(xdont,nobs,irngt) ! in :fortran_analog:fortran_routines.f90
+            real dimension(nobs),intent(in) :: xdont
+            integer, optional,intent(in),check(len(xdont)>=nobs),depend(xdont) :: nobs=len(xdont)
+            integer dimension(nobs),intent(out),depend(nobs) :: irngt
+        end subroutine real_rank
+        subroutine ties(ranks,vals,n_ranks,outranks) ! in :fortran_analog:fortran_routines.f90
+            integer dimension(n_ranks),intent(in) :: ranks
+            real dimension(n_ranks),intent(in),depend(n_ranks) :: vals
+            integer, optional,intent(in),check(len(ranks)>=n_ranks),depend(ranks) :: n_ranks=len(ranks)
+            real dimension(n_ranks),intent(out),depend(n_ranks) :: outranks
+        end subroutine ties
+        subroutine rmse(train,fcst,shape_bn,outdata) ! in :fortran_analog:fortran_routines.f90
+            real dimension(shape_bn),intent(in) :: train
+            real dimension(shape_bn),intent(in),depend(shape_bn) :: fcst
+            integer, optional,intent(in),check(len(train)>=shape_bn),depend(train) :: shape_bn=len(train)
+            real intent(out) :: outdata
+        end subroutine rmse
+        subroutine mae(train,fcst,shape_bn,outdata) ! in :fortran_analog:fortran_routines.f90
+            real dimension(shape_bn),intent(in) :: train
+            real dimension(shape_bn),intent(in),depend(shape_bn) :: fcst
+            integer, optional,intent(in),check(len(train)>=shape_bn),depend(train) :: shape_bn=len(train)
+            real intent(out) :: outdata
+        end subroutine mae
+        subroutine correlation(traindata,fcstdata,shape_bn,corr,sig) ! in :fortran_analog:fortran_routines.f90
+            real dimension(shape_bn),intent(in) :: traindata
+            real dimension(shape_bn),intent(in),depend(shape_bn) :: fcstdata
+            integer, optional,intent(in),check(len(traindata)>=shape_bn),depend(traindata) :: shape_bn=len(traindata)
+            real intent(out) :: corr
+            real :: sig
+        end subroutine correlation
+        subroutine rank_corr(traindata,fcstdata,shape_bn,corr,sig) ! in :fortran_analog:fortran_routines.f90
+            real dimension(shape_bn),intent(in) :: traindata
+            real dimension(shape_bn),intent(in),depend(shape_bn) :: fcstdata
+            integer, optional,intent(in),check(len(traindata)>=shape_bn),depend(traindata) :: shape_bn=len(traindata)
+            real intent(out) :: corr
+            real :: sig
+        end subroutine rank_corr
+    end interface 
+end python module fortran_analog
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/
