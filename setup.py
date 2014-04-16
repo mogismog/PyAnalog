@@ -15,9 +15,9 @@ VERSION = '0.1 dev'
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration
 
-    config = Configuration('analog', parent_package, top_path)
+    config = Configuration('pyanalog', parent_package, top_path)
     config.add_extension('fortran_analog',
-                         sources=['./analog/fortran_routines.f90', './analog/fortran_analog.pyf',
+                         sources=['./pyanalog/analog/fortran_routines.f90', './pyanalog/analog/fortran_analog.pyf',
                          ])
     return config
 
@@ -32,8 +32,7 @@ if __name__ == '__main__':
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,
-          packages=['pyanalog', 'pyanalog.analog', 'pyanalog.fortran_routines', \
-                    'pyanalog.get_dates', 'pyanalog.utils'],
+          packages=['pyanalog',],
           author='Francisco Alvarez',
           author_email='francisco.m.alvarez@gmail.com',
           install_requires=["numpy"],
