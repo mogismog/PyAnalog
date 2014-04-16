@@ -32,7 +32,7 @@ if __name__ == '__main__':
           url=URL,
           version=VERSION,
           download_url=DOWNLOAD_URL,
-          packages=['pyanalog',],
+          packages = ['pyanalog','pyanalog.analog'],
           author='Francisco Alvarez',
           author_email='francisco.m.alvarez@gmail.com',
           install_requires=["numpy"],
