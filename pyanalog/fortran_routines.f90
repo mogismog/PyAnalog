@@ -589,6 +589,174 @@ return
 
 end Subroutine rmse_analog_point
 
+Subroutine mae_analog_point(trainField,fcstField,trainnum,iNum,jNum,&
+     closeLat,closeLon,allLats,allLons,window,outRanks)
+INTEGER, INTENT(IN) :: iNum,jNum,closeLat,closeLon,window,trainnum
+real, intent(IN), dimension(iNum) :: allLats
+real, intent(IN), dimension(jNum) :: allLons
+real, INTENT(IN), DIMENSION(iNum,jNum) :: fcstField
+real, INTENT(IN), DIMENSION(trainnum,iNum,jNum) :: trainField
+real, intent(out), dimension(trainnum) :: outRanks
+
+! --- Now, some other variables we'll need
+integer :: i,j,np,startLatIdx,startLonIdx,endLonIdx,endLatIdx,n_grdpts
+real, DIMENSION(:,:,:),allocatable :: allData
+integer, DIMENSION(:),allocatable :: dummy_finalRanks
+real, dimension(:,:),allocatable :: trainData
+real, dimension(:), allocatable :: rankDiffs
+
+!f2py intent(in) iNum,jNum,trainnum,closeLat,closeLon,window,allLats,allLons,trainField,fcstField
+!f2py depend(iNum) allLats
+!f2py depend(jNum) allLons
+!f2py depend(iNum,jNum) fcstField
+!f2py depend(trainnum,iNum,jNum) trainField
+!f2py intent(out) outRanks
+!f2py depend(trainnum) outRanks
+
+outRanks(:) = -9999.9
+
+! --- Get latitude indices to iterate over
+do i = 1,iNum
+   if (allLats(i) .eq. closeLat) then
+      startLatIdx = i
+   end if
+end do
+
+! --- Get longitude indices to iterate over
+do j = 1,jNum
+   if (allLons(j) .eq. closeLon) then
+      startLonIdx = j
+   end if
+end do
+
+! --- Start big coefficient loop
+n_grdpts = ((window*2)+2)*((window*2)+2)
+
+! --- Let's allocate some arrays
+allocate(allData(trainnum+1,iNum,jNum)) ! --- train data + forecast data
+allocate(trainData(trainnum+1,((window*2)+1)*((window*2)+1))) ! --- 2-D training data
+allocate(rankDiffs(trainnum)) ! --- mean absolute difference of ranks
+allocate(dummy_finalRanks(trainnum)) ! --- rankings of rankDiffs array
+
+! --- We need to put the training and fcst data in one array
+allData(:trainnum,:,:) = trainField(:,:,:) ! --- Training data
+allData(trainnum+1,:,:) = fcstField(:,:) ! --- Forecast data
+
+! --- Now time to find ranking differences at each grid point given a window of grid points
+
+rankDiffs(:) = 999999
+! --- First, extract data
+trainData(:,:) = reshape(allData(:,i-window:i+window,j-window:j+window),(/trainnum+1,n_grdpts/))
+
+! --- Find sum of absolute value of rank differences
+do np = 1,trainnum
+   call mae(trainData(np,:),trainData(trainnum+1,:),n_grdpts,rankDiffs(np))
+end do
+
+! --- Ranking the ranked diffs to make it easier to get probabilities
+call real_rank(rankDiffs,size(rankDiffs),dummy_finalRanks)
+do np = 1,size(dummy_finalRanks)
+   outRanks(dummy_finalRanks(np)) = np-1
+end do
+
+
+! --- Time to deallocate those arrays
+deallocate(allData) ! --- train data + forecast data
+
+deallocate(trainData) ! --- 2-D training data
+
+deallocate(rankDiffs) ! --- mean absolute difference of ranks
+
+deallocate(dummy_finalRanks) ! --- rankings of rankDiffs array
+
+return
+
+end Subroutine mae_analog_point
+
+Subroutine corr_analog_point(trainField,fcstField,trainnum,iNum,jNum,&
+     closeLat,closeLon,allLats,allLons,window,outRanks)
+INTEGER, INTENT(IN) :: iNum,jNum,closeLat,closeLon,window,trainnum
+real, intent(IN), dimension(iNum) :: allLats
+real, intent(IN), dimension(jNum) :: allLons
+real, INTENT(IN), DIMENSION(iNum,jNum) :: fcstField
+real, INTENT(IN), DIMENSION(trainnum,iNum,jNum) :: trainField
+real, intent(out), dimension(trainnum) :: outRanks
+
+! --- Now, some other variables we'll need
+integer :: i,j,np,startLatIdx,startLonIdx,endLonIdx,endLatIdx,n_grdpts
+real, DIMENSION(:,:,:),allocatable :: allData
+integer, DIMENSION(:),allocatable :: dummy_finalRanks
+real, dimension(:,:),allocatable :: trainData
+real, dimension(:), allocatable :: rankDiffs
+
+!f2py intent(in) iNum,jNum,trainnum,closeLat,closeLon,window,allLats,allLons,trainField,fcstField
+!f2py depend(iNum) allLats
+!f2py depend(jNum) allLons
+!f2py depend(iNum,jNum) fcstField
+!f2py depend(trainnum,iNum,jNum) trainField
+!f2py intent(out) outRanks
+!f2py depend(trainnum) outRanks
+
+outRanks(:) = -9999.9
+
+! --- Get latitude indices to iterate over
+do i = 1,iNum
+   if (allLats(i) .eq. closeLat) then
+      startLatIdx = i
+   end if
+end do
+
+! --- Get longitude indices to iterate over
+do j = 1,jNum
+   if (allLons(j) .eq. closeLon) then
+      startLonIdx = j
+   end if
+end do
+
+! --- Start big coefficient loop
+n_grdpts = ((window*2)+2)*((window*2)+2)
+
+! --- Let's allocate some arrays
+allocate(allData(trainnum+1,iNum,jNum)) ! --- train data + forecast data
+allocate(trainData(trainnum+1,((window*2)+1)*((window*2)+1))) ! --- 2-D training data
+allocate(rankDiffs(trainnum)) ! --- mean absolute difference of ranks
+allocate(dummy_finalRanks(trainnum)) ! --- rankings of rankDiffs array
+
+! --- We need to put the training and fcst data in one array
+allData(:trainnum,:,:) = trainField(:,:,:) ! --- Training data
+allData(trainnum+1,:,:) = fcstField(:,:) ! --- Forecast data
+
+! --- Now time to find ranking differences at each grid point given a window of grid points
+
+rankDiffs(:) = 999999
+! --- First, extract data
+trainData(:,:) = reshape(allData(:,i-window:i+window,j-window:j+window),(/trainnum+1,n_grdpts/))
+
+! --- Find sum of absolute value of rank differences
+do np = 1,trainnum
+   call correlation(trainData(np,:),trainData(trainnum+1,:),n_grdpts,rankDiffs(np))
+end do
+
+! --- Ranking the ranked diffs to make it easier to get probabilities
+call real_rank(rankDiffs,size(rankDiffs),dummy_finalRanks)
+do np = 1,size(dummy_finalRanks)
+   outRanks(dummy_finalRanks(np)) = np-1
+end do
+
+
+! --- Time to deallocate those arrays
+deallocate(allData) ! --- train data + forecast data
+
+deallocate(trainData) ! --- 2-D training data
+
+deallocate(rankDiffs) ! --- mean absolute difference of ranks
+
+deallocate(dummy_finalRanks) ! --- rankings of rankDiffs array
+
+return
+
+end Subroutine corr_analog_point
+
 
 Subroutine real_rank (XDONT, NOBS, IRNGT)
 !

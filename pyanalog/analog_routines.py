@@ -6,6 +6,7 @@ import numpy as np
 
 from .utils import find_nearest_idx
 
+import fortran_routines as fort
 
 class Analog(object):
     """Various methods to produce deterministic/probabilistic forecasts via analogs."""
@@ -26,7 +27,7 @@ class Analog(object):
         self.train = train
 
 
-    def analog_params(self, window=3, comp_method=['Rank'], weights=[]):
+    def analog_params(self, window=3, comp_method=[], weights=[]):
         """
         Set up some parameters for whatever analog method.
 
@@ -119,19 +120,32 @@ class Analog(object):
 
         # --- Pre-generating analog indices array, this should be faster.
         if len(self.fcstLats) <= 1:
-            analog_idxs = np.ones(self.train.shape[0]) * -9999.9
+                analog_idxs = np.zeros(self.train.shape[0])
         else:
             if self.n_vars == 1:
-                analog_idxs = np.ones(self.train.shape) * -9999.9
+                analog_idxs = np.zeros(self.train.shape)
             else:
-                analog_idxs = np.ones((self.train.shape[0], self.train.shape[2], self.train.shape[3])) * -9999.9
+                analog_idxs = np.zeros((self.train.shape[0], self.train.shape[2], self.train.shape[3])) * -9999.9
 
         # --- Ok, let's do this...
         if self.point_fcst:
-            blah = 0
-            # --- We then find the closest analogs
-
-
-
+            if self.n_vars > 1:
+                for nv in self.n_vars:
+                    if self.comp_method[nv] == 'rank':
+                        analog_idxs[...] = fort.rank_analog.point(self.train, self.forecast, self.train.shape[0],\
+                                                                  self.allLats.shape[0],self.allLons.shape[0], \
+                                                                  self.closest_lat, self.closest_lon, self.window)
+                    if self.comp_method[nv] == 'rmse':
+                        analog_idxs[...] = fort.rmse_analog.point(self.train, self.forecast, self.train.shape[0],\
+                                                                  self.allLats.shape[0],self.allLons.shape[0], \
+                                                                  self.closest_lat, self.closest_lon, self.window)
+                    if self.comp_method[nv] == 'mae':
+                        analog_idxs[...] = fort.mae_analog.point(self.train, self.forecast, self.train.shape[0],\
+                                                                  self.allLats.shape[0],self.allLons.shape[0], \
+                                                                  self.closest_lat, self.closest_lon, self.window)
+                    if self.comp_method[nv] == 'corr':
+                        analog_idxs[...] = fort.corr_analog.point(self.train, self.forecast, self.train.shape[0],\
+                                                                  self.allLats.shape[0],self.allLons.shape[0], \
+                                                                  self.closest_lat, self.closest_lon, self.window)
 
 
