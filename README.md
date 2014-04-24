@@ -14,4 +14,4 @@ More to come, but this is part of a bigger project! This also serves as example 
 TODO:
 
 Fix up the setup.py file
-Finish writing things like the verification aspect, maybe add in an option for reliability?
+Finish writing things like the verification aspect, maybe add in an option to calculate reliability/skill/contingency table?
