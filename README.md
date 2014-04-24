@@ -5,7 +5,7 @@ Module used to generate weather forecasts based on analogs.
 
 Requires:
 
-NumPy (mainly f2py)
+NumPy (mainly f2py),
 Matplotlib
 
 
