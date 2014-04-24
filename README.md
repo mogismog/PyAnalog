@@ -1,7 +1,7 @@
 PyAnalog
 ========
 
-Module used to generate weather forecasts based on analogs.
+Module used to generate weather forecasts based on analogs. Mixes Python and Fortran 90 subroutines.
 
 Requires:
 
