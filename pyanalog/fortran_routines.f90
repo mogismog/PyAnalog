@@ -2,7 +2,7 @@
 ! FILE: fortran_routines.f90
 !  f2py -c -m fortran_routines fortran_routines.f90
 !  This file will have a collection of fortran routines that can be interfaced to python
-!  To be used with py-analog
+!  To be used with PyAnalog
 ! ======================
 
 Subroutine rank_analog(trainField,fcstField,trainnum,iNum,jNum,&

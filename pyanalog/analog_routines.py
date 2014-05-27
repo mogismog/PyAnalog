@@ -8,6 +8,12 @@ from .utils import find_nearest_idx
 
 import fortran_routines as fort
 
+# --- First, some exception classes
+class AnalogError(Exception):
+    pass
+class DomainError(Exception):
+    pass
+
 class Analog(object):
     """Various methods to produce deterministic/probabilistic forecasts via analogs."""
 
@@ -26,8 +32,12 @@ class Analog(object):
         self.forecast = forecast
         self.train = train
 
+        # --- Let's also set some defaults here used by other functions
+        self.window = 3
+        self.comp_method = []
+        self.weights = []
 
-    def analog_params(self, window=3, comp_method=[], weights=[]):
+    def analog_params(self, window=3, weights=[], comp_methods=['Rank']):
         """
         Set up some parameters for whatever analog method.
 
@@ -36,10 +46,16 @@ class Analog(object):
         window : integer
             +/- number of grid points (n/s, e/w) around each forecast grid point to include in local domain pattern\n
             matching. For example, if window = 3, we use 49 grid points to calculate differences between forecast/training\n
-            data (3*2 + 1)*(3+2 +1).
+            data (3*2 + 1)*(3+2 +1). Default = 3
         comp_method : list
             Method with which to pattern match. Options: ['Rank','MAE','RMSE','Corr'].
             if n_vars > 1, can use different methods to compare each variable.
+            Default = ['Rank']
+        weights : list
+            If we are using more than one variable, then one field may be more important to the predictor than others.
+            As such, we can weigh each variable by multiplying the pattern matching results by some value n, where 0<n<1.
+            IMPORTANT: Be sure that sum(n) == 1.
+            Default = None
         """
 
         # --- Here, we check to make sure everything is copacetic.
@@ -47,26 +63,24 @@ class Analog(object):
             self.n_vars = self.forecast.shape[0]
             # --- First, make sure we're dealing with same number of vars between fcst/train
             if self.forecast.shape[0] != self.train.shape[0]:
-                raise ValueError("Different number of variables between forecast and training data arrays!")
+                raise AnalogError("Different number of variables between forecast and training data arrays!")
             # --- Make sure there aren't more weights than variables
             if len(weights) > self.forecast.shape[0]:
-                raise ValueError("More weights than variables!")
-            if len(comp_method) > self.forecast.shape[0]:
-                raise ValueError("More methods than variables!")
+                raise AnalogError("More weights than variables!")
+            if len(comp_methods) > self.forecast.shape[0]:
+                    raise AnalogError("More methods than variables!")
         else:
             self.n_vars = 1
 
-        # --- Now, to make sure the method(2) selected is available, and if it is then add
+        # --- Now, to make sure the method selected is available, and if it is then add
         available_methods = ['rank','rmse','mae','corr']
         self.comp_method = []
-        for mthd in comp_method:
+        for mthd in comp_methods:
             if any(mthd.lower() in avail for avail in available_methods):
                 self.comp_method.append(mthd.lower())
             else:
                 warnings.warn('Method {} not an option! Reverting to rank method'.format(mthd.lower()))
                 self.comp_method.append('rank')
-
-
 
         # --- Everything cool? Ok, let's do this.
         self.window = window
@@ -76,7 +90,7 @@ class Analog(object):
 
     def domain(self, lat_bounds=[], lon_bounds=[], forecast_lats=[], forecast_lons=[], lat_inc=1, lon_inc=1):
         """
-        Main and forecast domain setup.
+        Sets up the forecast domain.
 
         Parameters
         ----------
@@ -90,7 +104,7 @@ class Analog(object):
         """
         # --- Here, we check to make sure everything is copacetic.
         if len(forecast_lats) != len(forecast_lons):
-            raise ValueError("len(lat_bounds) != len(lon_bounds)\nWe either need to forecast for a point or domain.")
+            raise DomainError("len(lat_bounds) != len(lon_bounds)\nWe either need to forecast for a point or domain.")
 
         # --- Everything cool? Ok, let's do this.
         if len(forecast_lats) == 1:
@@ -132,19 +146,19 @@ class Analog(object):
             if self.n_vars > 1:
                 for nv in self.n_vars:
                     if self.comp_method[nv] == 'rank':
-                        analog_idxs[...] = fort.rank_analog.point(self.train, self.forecast, self.train.shape[0],\
+                        analog_idxs[...] = fort.rank_analog_point(self.train, self.forecast, self.train.shape[0],\
                                                                   self.allLats.shape[0],self.allLons.shape[0], \
                                                                   self.closest_lat, self.closest_lon, self.window)
                     if self.comp_method[nv] == 'rmse':
-                        analog_idxs[...] = fort.rmse_analog.point(self.train, self.forecast, self.train.shape[0],\
+                        analog_idxs[...] = fort.rmse_analog_point(self.train, self.forecast, self.train.shape[0],\
                                                                   self.allLats.shape[0],self.allLons.shape[0], \
                                                                   self.closest_lat, self.closest_lon, self.window)
                     if self.comp_method[nv] == 'mae':
-                        analog_idxs[...] = fort.mae_analog.point(self.train, self.forecast, self.train.shape[0],\
+                        analog_idxs[...] = fort.mae_analog_point(self.train, self.forecast, self.train.shape[0],\
                                                                   self.allLats.shape[0],self.allLons.shape[0], \
                                                                   self.closest_lat, self.closest_lon, self.window)
                     if self.comp_method[nv] == 'corr':
-                        analog_idxs[...] = fort.corr_analog.point(self.train, self.forecast, self.train.shape[0],\
+                        analog_idxs[...] = fort.corr_analog_point(self.train, self.forecast, self.train.shape[0],\
                                                                   self.allLats.shape[0],self.allLons.shape[0], \
                                                                   self.closest_lat, self.closest_lon, self.window)
 
